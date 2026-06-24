@@ -80,7 +80,8 @@ namespace ClassGame {
         const ImVec2 text_size = ImGui::CalcTextSize(label, nullptr, false, wrap_width);
         const ImVec2 size(width, text_size.y + style.FramePadding.y * 2.0f);
 
-        const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+        const ImVec2 pos = window->DC.CursorPos;
+        const ImRect bb(pos, ImVec2(pos.x + size.x, pos.y + size.y));
         ImGui::ItemSize(size, style.FramePadding.y);
         if (!ImGui::ItemAdd(bb, id))
             return false;
@@ -95,7 +96,8 @@ namespace ClassGame {
             ImGuiCol_Button);
         ImGui::RenderNavHighlight(bb, id);
         ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
-        ImGui::RenderTextWrapped(bb.Min + style.FramePadding, label, nullptr, wrap_width);
+        const ImVec2 text_pos(bb.Min.x + style.FramePadding.x, bb.Min.y + style.FramePadding.y);
+        ImGui::RenderTextWrapped(text_pos, label, nullptr, wrap_width);
 
         return pressed;
     }
