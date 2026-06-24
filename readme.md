@@ -1,9 +1,3 @@
-<!--
-  NOTE TO SELF (delete before publishing if you like):
-  - Replace every "camcimahir" / "ai-boardgames" below with your real GitHub user + repo name.
-  - The "Play in browser" link works once GitHub Pages is enabled (Settings -> Pages -> Source: GitHub Actions).
-  - To add more media: drop files in media/ and reference them as media/filename%20with%20spaces.gif
--->
 
 # AI Board Games
 
@@ -29,10 +23,6 @@ thing is playable in the browser with no install.
 ---
 
 ## Chess
-
-<p align="center">
-  <img src="media/chess%20gif.gif" alt="Chess engine gameplay" width="720">
-</p>
 
 A complete, rules-accurate chess game with a from-scratch move generator and a searching AI that plays
 Black. It is engineered around speed, because a chess AI is limited by how many positions it can evaluate.
@@ -70,10 +60,6 @@ Black. It is engineered around speed, because a chess AI is limited by how many 
 ---
 
 ## Connect Four
-
-<p align="center">
-  <img src="media/connectfour%20gif.gif" alt="Connect Four AI gameplay" width="720">
-</p>
 
 Classic Connect Four with a genuinely strong AI.
 
