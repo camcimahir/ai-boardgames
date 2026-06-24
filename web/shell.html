@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI Board Games — Chess, Connect Four, Tic-Tac-Toe & AstroBots</title>
+    <meta name="description" content="A C++/Dear ImGui board game suite with Negamax + bitboard AI, compiled to WebAssembly. Play Chess, Connect Four, Tic-Tac-Toe and AstroBots in your browser.">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --panel: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --accent: #58a6ff;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 18px 16px 8px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            letter-spacing: 0.3px;
+        }
+        header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        .stage {
+            position: relative;
+            margin: 14px auto;
+            width: min(96vw, 1280px);
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+        }
+        canvas.emscripten {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #000;
+            outline: none;
+        }
+        #loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: var(--panel);
+            transition: opacity 0.4s ease;
+            z-index: 5;
+        }
+        #loading.hidden { opacity: 0; pointer-events: none; }
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #status { color: var(--muted); font-size: 0.9rem; min-height: 1.2em; }
+        .bar {
+            width: 240px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .bar > div {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 0.2s ease;
+        }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 4px 0 18px;
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+        .toolbar button {
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+        footer { color: var(--muted); font-size: 0.75rem; padding-bottom: 20px; text-align: center; }
+        a { color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Board Games</h1>
+        <p>Chess · Connect Four · Tic-Tac-Toe · AstroBots — C++ &amp; Dear ImGui, compiled to WebAssembly</p>
+    </header>
+
+    <div class="stage">
+        <div id="loading">
+            <div class="spinner"></div>
+            <div id="status">Loading…</div>
+            <div class="bar"><div id="progress"></div></div>
+        </div>
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+
+    <div class="toolbar">
+        <span>Use the in-app "Settings" panel to pick a game.</span>
+        <button id="fullscreen">Fullscreen</button>
+    </div>
+
+    <footer>
+        Tip: works best on desktop Chrome / Firefox / Edge. &nbsp;•&nbsp; The AI runs entirely in your browser.
+    </footer>
+
+    <script type="text/javascript">
+        var statusEl = document.getElementById('status');
+        var progressEl = document.getElementById('progress');
+        var loadingEl = document.getElementById('loading');
+        var canvasEl = document.getElementById('canvas');
+
+        document.getElementById('fullscreen').addEventListener('click', function () {
+            if (Module && Module.requestFullscreen) {
+                Module.requestFullscreen(false, false);
+            } else if (canvasEl.requestFullscreen) {
+                canvasEl.requestFullscreen();
+            }
+        });
+
+        var Module = {
+            preRun: [],
+            postRun: [],
+            print: function (text) { console.log(text); },
+            printErr: function (text) { console.error(text); },
+            canvas: (function () {
+                canvasEl.addEventListener('webglcontextlost', function (e) {
+                    alert('WebGL context lost. Please reload the page.');
+                    e.preventDefault();
+                }, false);
+                return canvasEl;
+            })(),
+            setStatus: function (text) {
+                if (!text) {
+                    statusEl.textContent = 'Ready';
+                    loadingEl.classList.add('hidden');
+                    return;
+                }
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                if (m) {
+                    var pct = (parseInt(m[2]) / parseInt(m[4])) * 100;
+                    progressEl.style.width = pct + '%';
+                    statusEl.textContent = m[1].trim();
+                } else {
+                    statusEl.textContent = text;
+                    if (/done|ready/i.test(text)) progressEl.style.width = '100%';
+                }
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function (left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing… (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+            }
+        };
+        Module.setStatus('Downloading…');
+        window.onerror = function () { Module.setStatus('Something went wrong — check the console.'); };
+    </script>
+    {{{ SCRIPT }}}
+</body>
+</html>
