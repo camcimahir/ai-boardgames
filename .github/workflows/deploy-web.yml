@@ -43,6 +43,9 @@ jobs:
           cp build-web/index.js    _site/
           cp build-web/index.wasm  _site/
           cp build-web/index.data  _site/
+          # Cache-bust: stamp the commit SHA so browsers always fetch the newest build.
+          sed -i "s/__CACHE_BUST__/${GITHUB_SHA}/g" _site/index.html
+          sed -i "s#src=\"index.js\"#src=\"index.js?v=${GITHUB_SHA}\"#g" _site/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

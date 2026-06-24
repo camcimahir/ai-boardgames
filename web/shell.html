@@ -160,9 +160,17 @@
             }
         });
 
+        // Replaced with the git commit SHA at deploy time (see deploy-web.yml). Left as a
+        // placeholder for local builds, where no cache-busting is needed.
+        var BUILD_VERSION = "__CACHE_BUST__";
+        var cacheBust = (BUILD_VERSION.indexOf("CACHE") === -1) ? ("?v=" + BUILD_VERSION) : "";
+
         var Module = {
             preRun: [],
             postRun: [],
+            // Append the build version to .wasm / .data requests so a new deploy is never
+            // hidden behind a previously cached binary.
+            locateFile: function (path, prefix) { return prefix + path + cacheBust; },
             print: function (text) { console.log(text); },
             printErr: function (text) { console.error(text); },
             canvas: (function () {
