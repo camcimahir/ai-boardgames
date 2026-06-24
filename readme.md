@@ -2,7 +2,7 @@
   NOTE TO SELF (delete before publishing if you like):
   - Replace every "camcimahir" / "ai-boardgames" below with your real GitHub user + repo name.
   - The "Play in browser" link works once GitHub Pages is enabled (Settings -> Pages -> Source: GitHub Actions).
-  - Drop your screenshots / GIFs into the media/ folder using the file names referenced below.
+  - GIFs go in the media/ folder. Names expected: chess.gif, connect-four.gif, astrobots.gif, tictactoe.png
 -->
 
 # AI Board Games
@@ -17,50 +17,15 @@ thing is playable in the browser with no install.
 
 **[Play it in your browser](https://camcimahir.github.io/ai-boardgames/)**
 &nbsp;|&nbsp;
-**[Download for Windows](https://github.com/camcimahir/ai-boardgames/releases/latest)**
-&nbsp;|&nbsp;
 **[Build from source](#build-from-source)**
 
-<!-- TODO: add a hero GIF of the chess engine in action (media/chess.gif) -->
+---
+
+## Chess
+
 <p align="center">
   <img src="media/chess.gif" alt="Chess engine gameplay" width="720">
 </p>
-
-## What this project demonstrates
-
-- A **chess engine built from first principles**: bitboards, magic bitboards for sliding pieces,
-  full rules (castling, en passant, check/checkmate/stalemate), and Perft-verified move generation.
-- **Game-tree search**: Negamax + alpha-beta pruning, with move ordering and evaluation tuning, applied
-  across four different games.
-- **Performance-minded C++**: 64-bit bitboards and bitwise operations instead of array scans, and an AI
-  decoupled from the UI so search isn't bottlenecked by rendering.
-- **Cross-platform engineering**: one C++20 / Dear ImGui codebase targeting DirectX 11, OpenGL, and
-  WebAssembly/WebGL.
-- **Automated delivery**: CI that builds the browser version and deploys it to GitHub Pages, and packages
-  a downloadable Windows build.
-
-## How to play
-
-The recommended option for most people is the browser demo — no install, nothing to unblock.
-
-| Option | How | Best for |
-| --- | --- | --- |
-| Browser (WebAssembly) | Open the **[live demo](https://camcimahir.github.io/ai-boardgames/)** | Quickest — runs immediately, no install |
-| Windows download | Grab the latest **[release `.zip`](https://github.com/camcimahir/ai-boardgames/releases/latest)**, unzip, run `AI-BoardGames.exe` | Fastest native performance (DirectX 11) |
-| From source | See [Build from source](#build-from-source) | Reading or modifying the code |
-
-The AI runs entirely on your machine (or in your browser tab). Once the app is open, use the **Settings**
-panel to pick a game and a mode (Human vs Human, Human vs AI, and so on).
-
-> **Note on the Windows download:** The executable is compiled by GitHub Actions CI and is not
-> code-signed (signing certificates cost ~$300+/yr and are not practical for portfolio projects).
-> Windows SmartScreen will warn "Unknown publisher" on first run — this is expected. To run it:
-> right-click `AI-BoardGames.exe` → Properties → check **Unblock** → Apply, then run it. The
-> browser demo above avoids this entirely.
-
-## Chess (the main project)
-
-<!-- TODO: media/chess.png -->
 
 A complete, rules-accurate chess game with a from-scratch move generator and a searching AI that plays
 Black. It is engineered around speed, because a chess AI is limited by how many positions it can evaluate.
@@ -95,9 +60,13 @@ Black. It is engineered around speed, because a chess AI is limited by how many 
 - To prove the move generator is correct, it runs a Perft (performance test) to depth 3, counting all
   reachable positions and catching tricky edge cases (en passant, castling legality, pins, and so on).
 
+---
+
 ## Connect Four
 
-<!-- TODO: media/connect-four.png -->
+<p align="center">
+  <img src="media/connect-four.gif" alt="Connect Four AI gameplay" width="720">
+</p>
 
 Classic Connect Four with a genuinely strong AI.
 
@@ -110,20 +79,13 @@ Classic Connect Four with a genuinely strong AI.
 - A positional score table breaks ties toward stronger central squares when the search bottoms out before
   a forced result, plus a small hard-coded opening for the AI's first two moves.
 
-## Tic-Tac-Toe
-
-<!-- TODO: media/tictactoe.png -->
-
-A minimal, unbeatable Tic-Tac-Toe — a clean demonstration of the Negamax idea that powers the larger games.
-
-- The AI plays second and uses Negamax to search every reachable end state, scoring +1 / -1 / 0 for
-  win / loss / draw, so it never loses.
-- Built on the engine's `BitHolder` (logic) and `Bit` (visuals) grid, with an 8-line lookup table for win
-  detection.
+---
 
 ## AstroBots
 
-<!-- TODO: media/astrobots.gif -->
+<p align="center">
+  <img src="media/astrobots.gif" alt="AstroBots space combat simulation" width="720">
+</p>
 
 A real-time space-combat sandbox where each ship is "programmed" with a tiny domain-specific language
 (DSL). You write a `SetupShip()` function that emits a sequence of opcodes (scan, thrust, turn, fire), and
@@ -134,6 +96,49 @@ the arena runs your bytecode every turn. Last ship alive wins.
 
 Full opcode reference, DSL macros, and bot-writing tips are in **[docs/ASTROBOTS.md](docs/ASTROBOTS.md)**.
 
+---
+
+## Tic-Tac-Toe
+
+<p align="center">
+  <img src="media/tictactoe.png" alt="Tic-Tac-Toe" width="400">
+</p>
+
+A minimal, unbeatable Tic-Tac-Toe — a clean demonstration of the Negamax idea that powers the larger games.
+
+- The AI plays second and uses Negamax to search every reachable end state, scoring +1 / -1 / 0 for
+  win / loss / draw, so it never loses.
+- Built on the engine's `BitHolder` (logic) and `Bit` (visuals) grid, with an 8-line lookup table for win
+  detection.
+
+---
+
+## What this project demonstrates
+
+- A **chess engine built from first principles**: bitboards, magic bitboards for sliding pieces,
+  full rules (castling, en passant, check/checkmate/stalemate), and Perft-verified move generation.
+- **Game-tree search**: Negamax + alpha-beta pruning, with move ordering and evaluation tuning, applied
+  across four different games.
+- **Performance-minded C++**: 64-bit bitboards and bitwise operations instead of array scans, and an AI
+  decoupled from the UI so search isn't bottlenecked by rendering.
+- **Cross-platform engineering**: one C++20 / Dear ImGui codebase targeting DirectX 11, OpenGL, and
+  WebAssembly/WebGL.
+- **Automated delivery**: CI that builds the browser version and deploys it to GitHub Pages, and packages
+  a downloadable Windows build.
+
+---
+
+## How to play
+
+**[Play it in your browser](https://camcimahir.github.io/ai-boardgames/)** — no install, runs immediately.
+
+Once the app is open, use the **Settings** panel to pick a game and a mode (Human vs Human, Human vs AI,
+and so on). The AI runs entirely in your browser tab.
+
+To build and run the native version locally, see [Build from source](#build-from-source).
+
+---
+
 ## Tech overview
 
 - Language / UI: C++20, Dear ImGui (docking branch).
@@ -143,6 +148,8 @@ Full opcode reference, DSL macros, and bot-writing tips are in **[docs/ASTROBOTS
 - Chess-specific: magic bitboards, FEN parsing, Perft verification.
 - Build: CMake, with CI that produces both the web build and a Windows download automatically.
 
+---
+
 ## Build from source
 
 ### Windows (native, DirectX 11)
@@ -151,7 +158,6 @@ Requires Visual Studio 2022 (Desktop C++ workload) and CMake.
 ```bash
 cmake -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
-# Run it (resources are copied next to the exe automatically):
 ./build/Release/demo.exe
 ```
 
@@ -173,22 +179,13 @@ Requires the [Emscripten SDK](https://emscripten.org/docs/getting_started/downlo
 ```bash
 emcmake cmake -B build-web -DCMAKE_BUILD_TYPE=Release
 cmake --build build-web -j
-# Serve the folder (file:// won't load .wasm), then open index.html:
 python -m http.server --directory build-web 8080
 ```
 
-You normally don't need to do this by hand — pushing to `main` builds and deploys the web version to
-GitHub Pages automatically (see `.github/workflows/deploy-web.yml`).
+Pushing to `main` builds and deploys the web version to GitHub Pages automatically
+(see `.github/workflows/deploy-web.yml`).
 
-## Releases and deployment (CI)
-
-This repo ships two GitHub Actions workflows:
-
-- `deploy-web.yml` — builds the Emscripten / WebAssembly bundle and publishes it to GitHub Pages on every
-  push to `main`. (Enable once under Settings -> Pages -> Source: GitHub Actions.)
-- `windows-release.yml` — builds the native Windows app, packages `AI-BoardGames.exe` and `resources/`
-  into a `.zip`, uploads it as a build artifact, and attaches it to a GitHub Release when you push a
-  version tag (for example `git tag v1.0.0 && git push origin v1.0.0`).
+---
 
 ## Credits
 
