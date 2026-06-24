@@ -67,6 +67,11 @@ namespace ClassGame {
 
     static void renderMainMenu()
     {
+        // Scale up all text and buttons in the menu so they are easy to read at a glance.
+        const float MENU_FONT_SCALE = 1.5f;
+        const float BTN_HEIGHT     = 40.0f;
+        ImGui::SetWindowFontScale(MENU_FONT_SCALE);
+
         ImGui::TextUnformatted("AI Boardgames");
         ImGui::Separator();
 
@@ -74,39 +79,49 @@ namespace ClassGame {
             ImGui::TextUnformatted("Pick a game:");
             ImGui::Spacing();
 
-            const ImVec2 btn(220, 0);
+            // Width fills the panel; height is explicit so buttons are easy to click.
+            const float panelW = ImGui::GetContentRegionAvail().x;
+            const ImVec2 btn(panelW, BTN_HEIGHT);
 
             if (ImGui::Button("Tic-Tac-Toe", btn)) {
                 startGame(GameType::TicTacToe, new TicTacToe());
             }
+            ImGui::Spacing();
             if (ImGui::Button("Connect Four", btn)) {
                 pendingGameType = GameType::ConnectFour;
             }
+            ImGui::Spacing();
             if (ImGui::Button("Chess", btn)) {
                 pendingGameType = GameType::Chess;
             }
+            ImGui::Spacing();
             if (ImGui::Button("AstroBots (Robots)", btn)) {
                 startGame(GameType::AstroBots, new AstroBots());
             }
+
+            ImGui::SetWindowFontScale(1.0f);
             return;
         }
 
         if (pendingGameType == GameType::ConnectFour) {
             ImGui::TextUnformatted("Connect Four — pick mode:");
             ImGui::Spacing();
-            const ImVec2 btn(260, 0);
+            const float panelW = ImGui::GetContentRegionAvail().x;
+            const ImVec2 btn(panelW, BTN_HEIGHT);
 
             if (ImGui::Button("Human vs Human", btn)) {
                 ConnectFour *c4 = new ConnectFour();
                 c4->setNumberOfPlayers(2);
                 startGame(GameType::ConnectFour, c4);
             }
+            ImGui::Spacing();
             if (ImGui::Button("Human vs AI (you go first)", btn)) {
                 ConnectFour *c4 = new ConnectFour();
                 c4->setNumberOfPlayers(2);
                 c4->setAIPlayer(1);
                 startGame(GameType::ConnectFour, c4);
             }
+            ImGui::Spacing();
             if (ImGui::Button("AI vs Human (AI goes first)", btn)) {
                 ConnectFour *c4 = new ConnectFour();
                 c4->setNumberOfPlayers(2);
@@ -117,19 +132,23 @@ namespace ClassGame {
             if (ImGui::Button("Back", btn)) {
                 pendingGameType = GameType::None;
             }
+
+            ImGui::SetWindowFontScale(1.0f);
             return;
         }
 
         if (pendingGameType == GameType::Chess) {
             ImGui::TextUnformatted("Chess — pick mode:");
             ImGui::Spacing();
-            const ImVec2 btn(260, 0);
+            const float panelW = ImGui::GetContentRegionAvail().x;
+            const ImVec2 btn(panelW, BTN_HEIGHT);
 
             if (ImGui::Button("Human vs Human", btn)) {
                 Chess *chess = new Chess();
                 chess->setUseAI(false);
                 startGame(GameType::Chess, chess);
             }
+            ImGui::Spacing();
             if (ImGui::Button("Human (White) vs AI (Black)", btn)) {
                 Chess *chess = new Chess();
                 chess->setUseAI(true);
@@ -139,6 +158,8 @@ namespace ClassGame {
             if (ImGui::Button("Back", btn)) {
                 pendingGameType = GameType::None;
             }
+
+            ImGui::SetWindowFontScale(1.0f);
             return;
         }
     }
