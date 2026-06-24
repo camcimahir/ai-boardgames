@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h" // DockBuilder API for the default layout
 #include <chrono>
 
 #include "classes/TicTacToe.h"
@@ -204,7 +205,25 @@ namespace ClassGame {
 
     void RenderGame()
     {
-        ImGui::DockSpaceOverViewport();
+        ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
+
+        // Build a sensible default layout the first time the app runs (and on the web every
+        // launch, since no imgui.ini is persisted): the game board fills the main area and the
+        // Settings panel is docked on the right, so players immediately see where to click.
+        static bool s_dockLayoutInitialized = false;
+        if (!s_dockLayoutInitialized) {
+            s_dockLayoutInitialized = true;
+            ImGui::DockBuilderRemoveNode(dockspace_id);
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
+
+            ImGuiID settings_id = 0;
+            ImGuiID game_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.78f, nullptr, &settings_id);
+
+            ImGui::DockBuilderDockWindow("GameWindow", game_id);
+            ImGui::DockBuilderDockWindow("Settings", settings_id);
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
 
         ImGui::Begin("Settings");
         if (!game) {
