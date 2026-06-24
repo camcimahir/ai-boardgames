@@ -65,11 +65,45 @@ namespace ClassGame {
         pendingGameType = GameType::None;
     }
 
+    // Full-width menu button that wraps long labels onto multiple lines and grows in height.
+    static bool MenuButton(const char* label, float width)
+    {
+        ImGuiWindow* window = ImGui::GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
+
+        ImGuiContext& g = *GImGui;
+        const ImGuiStyle& style = g.Style;
+        const ImGuiID id = window->GetID(label);
+
+        const float wrap_width = ImMax(1.0f, width - style.FramePadding.x * 2.0f);
+        const ImVec2 text_size = ImGui::CalcTextSize(label, nullptr, false, wrap_width);
+        const ImVec2 size(width, text_size.y + style.FramePadding.y * 2.0f);
+
+        const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+        ImGui::ItemSize(size, style.FramePadding.y);
+        if (!ImGui::ItemAdd(bb, id))
+            return false;
+
+        bool hovered = false;
+        bool held = false;
+        const bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
+
+        const ImU32 col = ImGui::GetColorU32(
+            (held && hovered) ? ImGuiCol_ButtonActive :
+            hovered ? ImGuiCol_ButtonHovered :
+            ImGuiCol_Button);
+        ImGui::RenderNavHighlight(bb, id);
+        ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+        ImGui::RenderTextWrapped(bb.Min + style.FramePadding, label, nullptr, wrap_width);
+
+        return pressed;
+    }
+
     static void renderMainMenu()
     {
         // Scale up all text and buttons in the menu so they are easy to read at a glance.
         const float MENU_FONT_SCALE = 1.5f;
-        const float BTN_HEIGHT     = 40.0f;
         ImGui::SetWindowFontScale(MENU_FONT_SCALE);
 
         ImGui::TextUnformatted("AI Boardgames");
@@ -79,23 +113,21 @@ namespace ClassGame {
             ImGui::TextUnformatted("Pick a game:");
             ImGui::Spacing();
 
-            // Width fills the panel; height is explicit so buttons are easy to click.
             const float panelW = ImGui::GetContentRegionAvail().x;
-            const ImVec2 btn(panelW, BTN_HEIGHT);
 
-            if (ImGui::Button("Tic-Tac-Toe", btn)) {
+            if (MenuButton("Tic-Tac-Toe", panelW)) {
                 startGame(GameType::TicTacToe, new TicTacToe());
             }
             ImGui::Spacing();
-            if (ImGui::Button("Connect Four", btn)) {
+            if (MenuButton("Connect Four", panelW)) {
                 pendingGameType = GameType::ConnectFour;
             }
             ImGui::Spacing();
-            if (ImGui::Button("Chess", btn)) {
+            if (MenuButton("Chess", panelW)) {
                 pendingGameType = GameType::Chess;
             }
             ImGui::Spacing();
-            if (ImGui::Button("AstroBots (Robots)", btn)) {
+            if (MenuButton("AstroBots (Robots)", panelW)) {
                 startGame(GameType::AstroBots, new AstroBots());
             }
 
@@ -107,29 +139,28 @@ namespace ClassGame {
             ImGui::TextUnformatted("Connect Four — pick mode:");
             ImGui::Spacing();
             const float panelW = ImGui::GetContentRegionAvail().x;
-            const ImVec2 btn(panelW, BTN_HEIGHT);
 
-            if (ImGui::Button("Human vs Human", btn)) {
+            if (MenuButton("Human vs Human", panelW)) {
                 ConnectFour *c4 = new ConnectFour();
                 c4->setNumberOfPlayers(2);
                 startGame(GameType::ConnectFour, c4);
             }
             ImGui::Spacing();
-            if (ImGui::Button("Human vs AI (you go first)", btn)) {
+            if (MenuButton("Human vs AI (you go first)", panelW)) {
                 ConnectFour *c4 = new ConnectFour();
                 c4->setNumberOfPlayers(2);
                 c4->setAIPlayer(1);
                 startGame(GameType::ConnectFour, c4);
             }
             ImGui::Spacing();
-            if (ImGui::Button("AI vs Human (AI goes first)", btn)) {
+            if (MenuButton("AI vs Human (AI goes first)", panelW)) {
                 ConnectFour *c4 = new ConnectFour();
                 c4->setNumberOfPlayers(2);
                 c4->setAIPlayer(0);
                 startGame(GameType::ConnectFour, c4);
             }
             ImGui::Spacing();
-            if (ImGui::Button("Back", btn)) {
+            if (MenuButton("Back", panelW)) {
                 pendingGameType = GameType::None;
             }
 
@@ -141,21 +172,20 @@ namespace ClassGame {
             ImGui::TextUnformatted("Chess — pick mode:");
             ImGui::Spacing();
             const float panelW = ImGui::GetContentRegionAvail().x;
-            const ImVec2 btn(panelW, BTN_HEIGHT);
 
-            if (ImGui::Button("Human vs Human", btn)) {
+            if (MenuButton("Human vs Human", panelW)) {
                 Chess *chess = new Chess();
                 chess->setUseAI(false);
                 startGame(GameType::Chess, chess);
             }
             ImGui::Spacing();
-            if (ImGui::Button("Human (White) vs AI (Black)", btn)) {
+            if (MenuButton("Human (White) vs AI (Black)", panelW)) {
                 Chess *chess = new Chess();
                 chess->setUseAI(true);
                 startGame(GameType::Chess, chess);
             }
             ImGui::Spacing();
-            if (ImGui::Button("Back", btn)) {
+            if (MenuButton("Back", panelW)) {
                 pendingGameType = GameType::None;
             }
 
