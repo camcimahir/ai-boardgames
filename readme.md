@@ -76,10 +76,6 @@ Classic Connect Four with a genuinely strong AI.
 
 ## AstroBots
 
-<p align="center">
-  <img src="media/astrobots.gif" alt="AstroBots space combat simulation" width="720">
-</p>
-
 A real-time space-combat sandbox where each ship is "programmed" with a tiny domain-specific language
 (DSL). You write a `SetupShip()` function that emits a sequence of opcodes (scan, thrust, turn, fire), and
 the arena runs your bytecode every turn. Last ship alive wins.
@@ -92,10 +88,6 @@ Full opcode reference, DSL macros, and bot-writing tips are in **[docs/ASTROBOTS
 ---
 
 ## Tic-Tac-Toe
-
-<p align="center">
-  <img src="media/tictactoe.png" alt="Tic-Tac-Toe" width="400">
-</p>
 
 A minimal, unbeatable Tic-Tac-Toe — a clean demonstration of the Negamax idea that powers the larger games.
 
