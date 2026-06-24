@@ -41,14 +41,22 @@ thing is playable in the browser with no install.
 
 ## How to play
 
+The recommended option for most people is the browser demo — no install, nothing to unblock.
+
 | Option | How | Best for |
 | --- | --- | --- |
-| Browser (WebAssembly) | Open the **[live demo](https://camcimahir.github.io/ai-boardgames/)** | Trying everything in a few seconds, no install |
-| Windows download | Grab the latest **[release `.zip`](https://github.com/camcimahir/ai-boardgames/releases/latest)**, unzip, run `AI-BoardGames.exe` | The fastest native experience (DirectX 11) |
+| Browser (WebAssembly) | Open the **[live demo](https://camcimahir.github.io/ai-boardgames/)** | Quickest — runs immediately, no install |
+| Windows download | Grab the latest **[release `.zip`](https://github.com/camcimahir/ai-boardgames/releases/latest)**, unzip, run `AI-BoardGames.exe` | Fastest native performance (DirectX 11) |
 | From source | See [Build from source](#build-from-source) | Reading or modifying the code |
 
 The AI runs entirely on your machine (or in your browser tab). Once the app is open, use the **Settings**
 panel to pick a game and a mode (Human vs Human, Human vs AI, and so on).
+
+> **Note on the Windows download:** The executable is compiled by GitHub Actions CI and is not
+> code-signed (signing certificates cost ~$300+/yr and are not practical for portfolio projects).
+> Windows SmartScreen will warn "Unknown publisher" on first run — this is expected. To run it:
+> right-click `AI-BoardGames.exe` → Properties → check **Unblock** → Apply, then run it. The
+> browser demo above avoids this entirely.
 
 ## Chess (the main project)
 

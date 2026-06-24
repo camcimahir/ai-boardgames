@@ -3,13 +3,22 @@ name: Windows Release Build
 # Builds a ready-to-run Windows package (demo .exe + resources) so recruiters
 # can download and double-click without installing a compiler.
 #   - Every push to main / manual run: uploads a downloadable build artifact.
-#   - Pushing a version tag (e.g. v1.0.0): also attaches the zip to a GitHub Release.
+#   - Pushing a version tag (e.g. v1.0.0): also creates a GitHub Release and
+#     attaches AI-BoardGames-Windows-x64.zip to it.
+#
+# NOTE: A git tag alone does NOT show up under Releases. The workflow below
+# must finish successfully to create the Release page entry.
 
 on:
   push:
     branches: [ main ]
     tags: [ 'v*' ]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag to publish as a GitHub Release (e.g. v1.0.1). Use this if the tag exists but no Release was created.'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -20,11 +29,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # When publishing an existing tag via workflow_dispatch, check out that tag.
+          ref: ${{ inputs.release_tag != '' && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
 
       - name: Configure
-        # Let CMake auto-detect whichever Visual Studio the runner ships with
-        # (avoids breaking when the hosted image bumps its VS version).
-        run: cmake -B build -A x64
+        shell: pwsh
+        run: |
+          # Prefer the VS generator on GitHub-hosted Windows runners.
+          $generators = @(
+            'Visual Studio 18 2026',
+            'Visual Studio 17 2022'
+          )
+          $configured = $false
+          foreach ($gen in $generators) {
+            Write-Host "Trying generator: $gen"
+            cmake -B build -G $gen -A x64
+            if ($LASTEXITCODE -eq 0) {
+              $configured = $true
+              break
+            }
+          }
+          if (-not $configured) {
+            Write-Error "Could not configure with any Visual Studio generator."
+            exit 1
+          }
 
       - name: Build (Release)
         run: cmake --build build --config Release
@@ -32,8 +61,20 @@ jobs:
       - name: Stage package
         shell: pwsh
         run: |
+          $exe = Get-ChildItem -Path build -Recurse -Filter demo.exe |
+            Where-Object { $_.FullName -match '\\Release\\' } |
+            Select-Object -First 1
+          if (-not $exe) {
+            $exe = Get-ChildItem -Path build -Recurse -Filter demo.exe | Select-Object -First 1
+          }
+          if (-not $exe) {
+            Write-Error "Could not find demo.exe under build/"
+            exit 1
+          }
+          Write-Host "Using executable: $($exe.FullName)"
+
           New-Item -ItemType Directory -Force -Path package | Out-Null
-          Copy-Item build/Release/demo.exe package/AI-BoardGames.exe
+          Copy-Item $exe.FullName package/AI-BoardGames.exe
           Copy-Item -Recurse resources package/resources
           Compress-Archive -Path package/* -DestinationPath AI-BoardGames-Windows-x64.zip -Force
 
@@ -43,8 +84,27 @@ jobs:
           name: AI-BoardGames-Windows-x64
           path: AI-BoardGames-Windows-x64.zip
 
-      - name: Attach to Release (tagged builds only)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Resolve release tag
+        id: release_tag
+        shell: pwsh
+        run: |
+          $tag = ''
+          if ('${{ github.ref_type }}' -eq 'tag') {
+            $tag = '${{ github.ref_name }}'
+          } elseif ('${{ inputs.release_tag }}' -ne '') {
+            $tag = '${{ inputs.release_tag }}'
+          }
+          Write-Host "Resolved release tag: $tag"
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.release_tag.outputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: Release ${{ steps.release_tag.outputs.tag }}
+          generate_release_notes: true
           files: AI-BoardGames-Windows-x64.zip
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
